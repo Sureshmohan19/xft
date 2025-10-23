@@ -571,6 +571,12 @@ def dtype(x, *, canonicalize: bool = False) -> DType:
     # Handle DType directly
     if isinstance(x, DType):
         dt = x
+
+    # Handle NumPy scalar types BEFORE checking for .dtype attribute.
+    # e.g., np.int32, np.float64
+    elif isinstance(x, type) and np.issubdtype(x, np.generic):
+        dt = _to_xft_dtype(np.dtype(x))
+        
     # Handle Python type classes
     elif isinstance(x, type) and x in _py_scalar_types:
         dt = _py_scalar_types[x]()
@@ -677,13 +683,19 @@ def dtype_to_numpy(dtype_in):
     return dt.native_type
 
 def numpy_to_dtype(np_dtype) -> DType:
-    """Convert NumPy dtype to xft DType."""
+    """Convert NumPy dtype or scalar class to xft DType."""
+    if isinstance(np_dtype, type) and np.issubdtype(np_dtype, np.generic):  # e.g., np.float32, np.int64
+        np_dtype = np.dtype(np_dtype)
+    elif not isinstance(np_dtype, np.dtype):
+        try:
+            np_dtype = np.dtype(np_dtype)
+        except Exception as e:
+            raise TypeError(f"Invalid input to numpy_to_dtype: {np_dtype}") from e
+
     try:
         return _np_to_dtype_map[np_dtype]
     except KeyError as e:
-        raise TypeError(
-            f"NumPy dtype {np_dtype} is not a supported xft DType."
-        ) from e
+        raise TypeError(f"NumPy dtype {np_dtype} is not a supported xft DType.") from e
 
 # TYPE PROMOTION LATTICE
 
@@ -723,23 +735,31 @@ def _type_promotion_lattice(method: str) -> dict:
         # NumPy-compatible: generous promotion including int→float
         return {
             b: [weak_int],
-            weak_int: [u2, u4, u8, i2, i4, i8],
-            u2: [], u4: [],
-            i2: [], i4: [],
+
+            weak_int: [u8, u2, i8, u4, i2, i4],
+
+            u2: [], 
+            u4: [],
             u8: [i16, u16],
-            i8: [i16],
             u16: [i32, u32],
-            i16: [i32],
             u32: [i64, u64],
-            i32: [i64],
             u64: [weak_float],
+
+            i2: [], i4: [],
+            i8: [i16],
+            i16: [i32],
+            i32: [i64],
             i64: [weak_float],
+
             weak_float: [*custom_floats, bf, f16, weak_complex],
+
             **{t: [] for t in custom_floats},
+
             bf: [f32],
             f16: [f32],
             f32: [f64, c64],
             f64: [c128],
+
             weak_complex: [c64],
             c64: [c128],
             c128: [],
@@ -750,16 +770,25 @@ def _type_promotion_lattice(method: str) -> dict:
         all_complex = list(dtypes.complexes)
         
         return {
-            dtypes.bool: [weak_int],
+            b: [weak_int],
             weak_int: [weak_float] + all_ints,
             weak_float: [weak_complex] + all_floats,
             weak_complex: all_complex,
-            **{t: [] for t in all_ints + all_floats + all_complex}
+            **{t: [] for t in dtypes.all}
         }
 
 def _make_lattice_upper_bounds(method: str) -> dict:
     """Precompute all reachable ancestors for each node."""
     lattice = _type_promotion_lattice(method)
+
+    # Ensure all nodes, including endpoints, are in the lattice dict.
+    all_nodes = set(lattice.keys())
+    for succs in lattice.values():
+        all_nodes.update(succs)
+    for node in all_nodes:
+        if node not in lattice:
+            lattice[node] = []
+    # --- END ADD BLOCK ---
     upper_bounds = {node: {node} for node in lattice}
 
     for node in lattice:
@@ -804,6 +833,7 @@ def _least_upper_bound(method: str, *nodes):
     
     if len(least_upper) == 1:
         return least_upper.pop()
+    
     elif len(least_upper) == 0:
         node_names = tuple(
             n.name if isinstance(n, DType) else str(n) for n in nodes

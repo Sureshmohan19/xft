@@ -1,5 +1,8 @@
 import numpy as np
 import ml_dtypes
+import jax
+import jax.numpy as jnp
+import itertools
 
 # Import the code we are testing
 from xft._internal import dtype as xft_dtypes
@@ -15,6 +18,27 @@ from tests.test_base import XftTestCase, parameterized
 # multiple times with different inputs. This is incredibly powerful for
 # ensuring our code works across all dtypes.
 
+# This list defines all the types we want to use for our exhaustive test.
+# It includes Python weak types and all the native types corresponding to our DTypes.
+_JAX_COMPAT_TYPES = [
+    # Weak Types
+    bool, int, float, complex,
+    # Strong Types
+    np.bool_, np.int8, np.int16, np.int32, np.int64,
+    np.uint8, np.uint16, np.uint32, np.uint64,
+    ml_dtypes.bfloat16,
+    np.float16, np.float32, np.float64,
+    np.complex64, np.complex128,
+    # Your custom small int types
+    ml_dtypes.int2, ml_dtypes.int4,
+    ml_dtypes.uint2, ml_dtypes.uint4,
+]
+
+def get_name(t):
+    """Helper function to get a clean name for a type."""
+    try: return np.dtype(t).name
+    except TypeError: return t.__name__
+    
 class DTypeTest(XftTestCase):
 
     # 1. Test dtype properties of DType objects
@@ -374,3 +398,195 @@ class DTypeTest(XftTestCase):
         self.assertFalse(xft_dtypes.compatible_dtypes(
             xft_dtypes.dtypes.float8_e4m3fn, xft_dtypes.dtypes.bfloat16
         ))
+
+    # testing type promotion
+    @parameterized.expand([
+        # (test_name_suffix, dtype1, dtype2, expected)
+        ("float32_float64", xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float64, xft_dtypes.dtypes.float64),
+        ("int32_float32", xft_dtypes.dtypes.int32, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float32),
+        ("bool_int8", xft_dtypes.dtypes.bool, xft_dtypes.dtypes.int8, xft_dtypes.dtypes.int8),
+        ("complex64_float32", xft_dtypes.dtypes.complex64, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.complex64),
+        ("int16_int64", xft_dtypes.dtypes.int16, xft_dtypes.dtypes.int64, xft_dtypes.dtypes.int64),
+    ])
+    def test_promote_types(self, name, dtype1, dtype2, expected):
+        """
+        Test dtype promotion logic.
+        Ensures promote_types() returns the correct resulting dtype.
+        """
+        result = xft_dtypes.promote_types(dtype1, dtype2)
+        self.assertEqual(result, expected, f"Promotion failed for {dtype1} and {dtype2}")
+
+    @parameterized.expand([
+        # (test_name_suffix, inputs, expected_result_type)
+        ("int32_float32", [xft_dtypes.dtypes.int32, xft_dtypes.dtypes.float32], xft_dtypes.dtypes.float32),
+        ("float32_float64", [xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float64], xft_dtypes.dtypes.float64),
+        ("complex64_float64", [xft_dtypes.dtypes.complex64, xft_dtypes.dtypes.float64], xft_dtypes.dtypes.complex128),
+        ("bool_int8", [xft_dtypes.dtypes.bool, xft_dtypes.dtypes.int8], xft_dtypes.dtypes.int8),
+        ("int16_int64_bool", [xft_dtypes.dtypes.int16, xft_dtypes.dtypes.int64, xft_dtypes.dtypes.bool], xft_dtypes.dtypes.int64),
+    ])
+    def test_result_type(self, name, dtypes, expected):
+        """
+        Test result_type() logic.
+        Ensures the resulting dtype matches the highest precision among inputs.
+        """
+        result = xft_dtypes.result_type(*dtypes)
+        self.assertEqual(result, expected, f"Result type mismatch for {dtypes}")
+
+    # Promotion Mode Behaviour
+    @parameterized.expand([
+        ("strict_blocks_unsafe_promotion", "strict", xft_dtypes.dtypes.int32, xft_dtypes.dtypes.float32, xft_dtypes.TypePromotionError),
+        ("standard_allows_promotion", "standard", xft_dtypes.dtypes.int32, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float32),
+    ])
+    def test_promotion_mode_behavior(self, name, mode, d1, d2, expected):
+        """
+        Checks how strict vs standard promotion modes behave.
+        """
+        xft_dtypes.set_promotion_mode(mode)
+        if isinstance(expected, type) and issubclass(expected, Exception):
+            with self.assertRaises(expected):
+                _ = xft_dtypes.promote_types(d1, d2)
+        else:
+            result = xft_dtypes.promote_types(d1, d2)
+            self.assertEqual(result, expected)
+
+    # Edge and Error Cases
+    @parameterized.expand([
+        ("string_and_float", xft_dtypes.dtypes.string, xft_dtypes.dtypes.float32, ValueError),
+        ("unsupported_object", xft_dtypes.dtypes.int32, "not_a_dtype", TypeError),
+        ("same_type_float32", xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float32),
+        ("bool_and_bool", xft_dtypes.dtypes.bool, xft_dtypes.dtypes.bool, xft_dtypes.dtypes.bool),
+        ("bfloat16_and_float32", xft_dtypes.dtypes.bfloat16, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float32),
+        ("complex128_and_bool", xft_dtypes.dtypes.complex128, xft_dtypes.dtypes.bool, xft_dtypes.dtypes.complex128),
+    ])
+    def test_promote_types_edge_and_error(self, name, d1, d2, expected):
+        """
+        Covers unsupported types, same-type idempotency, and mixed categories.
+        """
+        if isinstance(expected, type) and issubclass(expected, Exception):
+            with self.assertRaises(expected):
+                _ = xft_dtypes.promote_types(d1, d2)
+        else:
+            result = xft_dtypes.promote_types(d1, d2)
+            self.assertEqual(result, expected)
+
+    # 4. Multi-input Result Type Chains
+    @parameterized.expand([
+        ("int_chain", [xft_dtypes.dtypes.int8, xft_dtypes.dtypes.int16, xft_dtypes.dtypes.int32], xft_dtypes.dtypes.int32),
+        ("int_to_float_chain", [xft_dtypes.dtypes.int16, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float64], xft_dtypes.dtypes.float64),
+        ("float_to_complex_chain", [xft_dtypes.dtypes.float16, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.complex64], xft_dtypes.dtypes.complex64),
+        ("mixed_chain_upgrades_to_complex128", [xft_dtypes.dtypes.int32, xft_dtypes.dtypes.float64, xft_dtypes.dtypes.complex64], xft_dtypes.dtypes.complex128),
+        ("bool_mixed_chain", [xft_dtypes.dtypes.bool, xft_dtypes.dtypes.int8, xft_dtypes.dtypes.float32], xft_dtypes.dtypes.float32),
+    ])
+    def test_result_type_multi_chain(self, name, dtypes, expected):
+        """
+        Ensures chained promotions yield consistent results.
+        """
+        result = xft_dtypes.result_type(*dtypes)
+        self.assertEqual(result, expected)
+
+    # Consistency with NumPy (result_type)
+    @parameterized.expand([
+        ("float32_float64", np.float32, np.float64),
+        ("int32_float64", np.int32, np.float64),
+        ("complex64_float32", np.complex64, np.float32),
+        ("complex64_float64", np.complex64, np.float64),
+        ("bool_int16", np.bool_, np.int16),
+        ("bfloat16_float32", ml_dtypes.bfloat16, np.float32),
+    ])
+    def test_result_type_consistency_with_numpy(self, name, np_dt1, np_dt2):
+        """
+        Validates that our result_type aligns with NumPy's for numeric cases.
+        """
+        ours = xft_dtypes.result_type(
+            xft_dtypes.numpy_to_dtype(np_dt1),
+            xft_dtypes.numpy_to_dtype(np_dt2),
+        )
+        expected = xft_dtypes.numpy_to_dtype(np.result_type(np_dt1, np_dt2))
+        self.assertEqual(ours, expected)
+
+    # Consistency with NumPy (promote_types)
+    @parameterized.expand([
+        ("float32_float64", np.float32, np.float64),
+        ("int32_float64", np.int32, np.float64),
+        ("complex64_float64", np.complex64, np.float64),
+        ("bool_float32", np.bool_, np.float32),
+        ("complex128_int32", np.complex128, np.int32),
+    ])
+    def test_promote_types_consistency_with_numpy(self, name, np_dt1, np_dt2):
+        """
+        Validates promote_types() agrees with NumPy’s promotion behavior.
+        """
+        ours = xft_dtypes.promote_types(
+            xft_dtypes.numpy_to_dtype(np_dt1),
+            xft_dtypes.numpy_to_dtype(np_dt2),
+        )
+        expected = xft_dtypes.numpy_to_dtype(np.promote_types(np_dt1, np_dt2))
+        self.assertEqual(ours, expected)
+
+    # Algebraic Properties (Regression Tests)
+    @parameterized.expand([
+        ("commutativity_float32_float64", xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float64),
+        ("commutativity_int16_float32", xft_dtypes.dtypes.int16, xft_dtypes.dtypes.float32),
+        ("associativity_chain", [xft_dtypes.dtypes.int8, xft_dtypes.dtypes.float32, xft_dtypes.dtypes.float64]),
+    ])
+    def test_promotion_algebraic_properties(self, name, *args):
+        """
+        Checks that type promotion is commutative and associative.
+        """
+        if len(args) == 2:
+            d1, d2 = args
+            a = xft_dtypes.promote_types(d1, d2)
+            b = xft_dtypes.promote_types(d2, d1)
+            self.assertEqual(a, b, f"Promotion not commutative for {d1}, {d2}")
+        else:
+            d1, d2, d3 = args[0]
+            left = xft_dtypes.promote_types(xft_dtypes.promote_types(d1, d2), d3)
+            right = xft_dtypes.promote_types(d1, xft_dtypes.promote_types(d2, d3))
+            self.assertEqual(left, right, "Promotion not associative")
+
+    # =========================================================================
+    # FINAL EXHAUSTIVE PROMOTION TEST
+    # =========================================================================
+
+    @parameterized.expand([
+        (f"{get_name(t1)}_{get_name(t2)}", t1, t2)
+        for t1, t2 in itertools.product(_JAX_COMPAT_TYPES, repeat=2)
+    ])
+    def test_exhaustive_promotion_matches_jax(self, name, type1, type2):
+        """
+        Exhaustively verifies that xft.promote_types() matches JAX's behavior
+        for every possible pair of numeric and weak types.
+        """
+        # --- Setup: Configure both JAX and xft to a known state (x64 enabled) ---
+        original_xft_x64 = xft_dtypes.get_x64_enabled()
+        original_jax_x64 = jax.config.jax_enable_x64
+        try:
+            xft_dtypes.set_x64_enabled(True)
+            jax.config.update("jax_enable_x64", True)
+            
+            # --- Get the "Ground Truth" result from JAX ---
+            jax_result_name = "ERROR"
+            try:
+                jax_result = jnp.promote_types(type1, type2)
+                jax_result_name = jax_result.name
+            except (TypeError, ValueError):
+                # If JAX raises an error, we expect our library to also raise an error.
+                with self.assertRaises(xft_dtypes.TypePromotionError):
+                    xft_dtypes.promote_types(type1, type2)
+                # If both errored, the test for this pair is successful.
+                return
+
+            # --- Get the result from our xft implementation ---
+            xft_result = xft_dtypes.promote_types(type1, type2)
+
+            # --- Assert that our result's name matches JAX's result's name ---
+            self.assertEqual(
+                xft_result.name,
+                jax_result_name,
+                f"Promotion mismatch for {name}: expected {jax_result_name} (from JAX), got {xft_result.name}",
+            )
+
+        finally:
+            # --- Teardown: Restore original configuration for other tests ---
+            xft_dtypes.set_x64_enabled(original_xft_x64)
+            jax.config.update("jax_enable_x64", original_jax_x64)
