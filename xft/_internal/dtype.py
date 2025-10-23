@@ -67,7 +67,7 @@ class DType:
     native_type: object
 
     def __repr__(self) -> str:
-        return f'dtypes.{self.name}'
+        return f'xft.dtypes.{self.name}'
     
     def __str__(self) -> str:
         return self.name
@@ -244,27 +244,27 @@ class dtypes:
     
     # Type checking methods
     @staticmethod
-    def is_float(x: DType) -> bool:
+    def is_float(x: DType):
         """Check if dtype is a floating-point type."""
         return 16 <= x.priority <= 28 and x in dtypes.floats
     
     @staticmethod
-    def is_int(x: DType) -> bool:
+    def is_int(x: DType):
         """Check if dtype is an integer type."""
         return 4 <= x.priority <= 15 and x in dtypes.ints
     
     @staticmethod
-    def is_unsigned(x: DType) -> bool:
+    def is_unsigned(x: DType):
         """Check if dtype is unsigned."""
         return x in dtypes.uints
     
     @staticmethod
-    def is_bool(x: DType) -> bool:
+    def is_bool(x: DType):
         """Check if dtype is boolean."""
         return x is dtypes.bool
     
     @staticmethod
-    def is_string(x: DType) -> bool:
+    def is_string(x: DType):
         """Check if dtype is a string type."""
         return x in dtypes.string_types
 
@@ -578,7 +578,7 @@ def dtype(x, *, canonicalize: bool = False) -> DType:
     elif type(x) in _py_scalar_types:
         dt = _py_scalar_types[type(x)]()
         # Overflow check for int literals
-        if isinstance(x, int):
+        if isinstance(x, int) and not isinstance(x, bool):
             info = int_info(dt.native_type)
             if not (info.min <= x <= info.max):
                 raise OverflowError(
@@ -847,8 +847,8 @@ def promote_types(a, b) -> DType:
     return result
 
 def _lattice_result_type(*args) -> Tuple[DType, bool]:
-    """Core promotion logic with weak type handling.
-    
+    """
+    Core promotion logic with weak type handling.
     Returns (promoted_dtype, is_weak) tuple.
     """
     method = _DTYPE_PROMOTION_MODE
