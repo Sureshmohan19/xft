@@ -1,0 +1,6 @@
+pyproject.toml
+xft/__init__.py
+xft.egg-info/PKG-INFO
+xft.egg-info/SOURCES.txt
+xft.egg-info/dependency_links.txt
+xft.egg-info/top_level.txt
