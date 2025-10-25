@@ -8,6 +8,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Find Python first (required by nanobind)
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
 
+set(XLA_SOURCE_DIR "/Users/aakritisuresh/Desktop/xla")
+include_directories(${XLA_SOURCE_DIR})
+
 # Automatically find nanobind via Python
 execute_process(
     COMMAND python -m nanobind --cmake_dir
@@ -20,4 +23,6 @@ find_package(nanobind REQUIRED)
 
 # This command creates our Python module
 # It will be named xftcpp.so (or .pyd on Windows)
-nanobind_add_module(xftcpp src/main.cpp)
+nanobind_add_module(xftcpp 
+    src/main.cpp
+    src/Version.cpp )
