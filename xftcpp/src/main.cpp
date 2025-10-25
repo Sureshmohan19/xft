@@ -2,6 +2,7 @@
 #include <nanobind/stl/string.h>
 
 #include "Version.h"
+#include "pjrt_plugin.h"
 
 namespace nb = nanobind;
 
@@ -13,4 +14,7 @@ NB_MODULE(xftcpp, m) {
     // bind the functions from our other files.
     m.def("get_version", &xftcpp::get_version, 
           "Returns the version of the xftcpp library.");
+        
+   m.def("test_pjrt_plugin_load", &xftcpp::test_pjrt_plugin_load, 
+          "Tests loading the self-built PJRT plugin.");
 }

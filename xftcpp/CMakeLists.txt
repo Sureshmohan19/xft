@@ -25,4 +25,6 @@ find_package(nanobind REQUIRED)
 # It will be named xftcpp.so (or .pyd on Windows)
 nanobind_add_module(xftcpp 
     src/main.cpp
-    src/Version.cpp )
+    src/Version.cpp
+    src/pjrt_plugin.cpp
+)
