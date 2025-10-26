@@ -1,0 +1,30 @@
+# Minimal BUILD - just verify we can reference XLA
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+# Simple test: can we link to XLA?
+cc_binary(
+    name = "test_xla_link",
+    srcs = ["test_xla_link.cc"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@xla//xla:util",
+    ],
+)
+
+# ---------------------------------------------------
+# PJRT CPU Client test
+# ---------------------------------------------------
+cc_binary(
+    name = "test_pjrt_basic",
+    srcs = ["src/test_pjrt_basic.cpp"],  # adjust if file is elsewhere
+    deps = [
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/types:span",
+        "@xla//xla:literal",
+        "@xla//xla:shape_util",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt/cpu:cpu_client",
+    ],
+    visibility = ["//visibility:public"],
+)
