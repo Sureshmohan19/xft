@@ -1,0 +1,8 @@
+licenses(["notice"])  # BSD / Python Software Foundation compatible
+
+package(default_visibility = ["//visibility:public"])
+
+alias(
+    name = "headers",
+    actual = "@rules_python//python/cc:current_py_cc_headers",
+)

@@ -1,1 +1,3 @@
-# Empty requirements - just testing XLA linking
+# Minimal requirements for xftcpp Python bindings
+numpy>=1.24.0
+ml-dtypes>=0.3.0

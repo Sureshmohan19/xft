@@ -3,8 +3,8 @@
 #include <dlfcn.h>
 #include <stdexcept>
 #include <string>
+#include <iostream>
 #include "xla/pjrt/c/pjrt_c_api.h"
-#include <nanobind/stl/string.h>
 
 namespace xftcpp {
 
@@ -40,6 +40,12 @@ std::string test_pjrt_plugin_load() {
     } catch (const std::exception& e) {
         return "C++ ERROR: " + std::string(e.what());
     }
+}
+
+int main() {
+    std::cout << "=== Testing PJRT plugin load from C++ ===" << std::endl;
+    std::cout << xftcpp::test_pjrt_plugin_load() << std::endl;
+    return 0;
 }
 
 } // namespace xftcpp

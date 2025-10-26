@@ -11,12 +11,9 @@ cc_binary(
     ],
 )
 
-# ---------------------------------------------------
-# PJRT CPU Client test
-# ---------------------------------------------------
 cc_binary(
     name = "test_pjrt_basic",
-    srcs = ["src/test_pjrt_basic.cpp"],  # adjust if file is elsewhere
+    srcs = ["src/test_pjrt_basic.cpp"],  
     deps = [
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
@@ -25,6 +22,37 @@ cc_binary(
         "@xla//xla:shape_util",
         "@xla//xla/pjrt:pjrt_client",
         "@xla//xla/pjrt/cpu:cpu_client",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "pjrt_plugin_lib",
+    srcs = ["src/pjrt_plugin.cpp"],
+    hdrs = ["src/pjrt_plugin.h"],
+    deps = ["@xla//xla/pjrt/c:pjrt_c_api_hdrs"],
+    visibility = ["//visibility:private"],
+)
+
+cc_binary(
+    name = "test_pjrt_plugin",
+    srcs = [],
+    deps = [":pjrt_plugin_lib"],
+)
+## ---------------------------------------------------
+# Python bindings - Simple approach
+# ---------------------------------------------------
+load("//xftcpp/tools:pywrap.bzl", "pywrap_extension")
+
+pywrap_extension(
+    name = "_xft_core",
+    srcs = ["src/xft_bindings.cpp"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt/cpu:cpu_client",
+        "@xla//xla/pjrt:status_casters",
     ],
     visibility = ["//visibility:public"],
 )

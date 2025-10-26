@@ -47,6 +47,9 @@ python_init_toolchains()
 load("@xla//third_party/py:python_init_pip.bzl", "python_init_pip")
 python_init_pip()
 
+load("@pypi//:requirements.bzl", "install_deps")
+install_deps()
+
 load("@xla//:workspace2.bzl", "xla_workspace2")
 xla_workspace2()
 
