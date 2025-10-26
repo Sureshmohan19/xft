@@ -9,8 +9,28 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# C extensions
+# Bazel build artifacts
+bazel-*
+bazel-bin/
+bazel-out/
+bazel-testlogs/
+bazel-xla/
+bazel-xft/
+bazel-workspace/
+bazel-execroot/
+bazel-cache/
+
+# Compiled binaries and object files
 *.so
+*.o
+*.lo
+*.a
+*.pyc
+*.pyo
+*.pyd
+*.exe
+*.dll
+*.dylib
 
 # Distribution / packaging
 .Python
