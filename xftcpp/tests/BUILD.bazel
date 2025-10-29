@@ -1,0 +1,35 @@
+
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_test")
+load("//xftcpp/tools:pywrap.bzl", "pywrap_extension")
+
+# XLA linking verification test
+cc_binary(
+    name = "test_xla_link",
+    srcs = ["test_xla_link.cc"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@xla//xla:util",
+    ],
+)
+
+# PJRT basic functionality test
+cc_binary(
+    name = "test_pjrt_basic",
+    srcs = ["test_pjrt_basic.cpp"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/types:span",
+        "@xla//xla:literal",
+        "@xla//xla:shape_util",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt/cpu:cpu_client",
+    ],
+)
+
+# Nanobind verification test
+pywrap_extension(
+    name = "_test_nanobind",
+    srcs = ["test_nanobind.cpp"],
+    visibility = ["//visibility:public"]
+)

@@ -1,0 +1,20 @@
+
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+# Version library
+cc_library(
+    name = "version_lib",
+    srcs = ["Version.cpp"],
+    hdrs = ["Version.h"],
+    includes = ["."],
+    visibility = ["//xftcpp:__subpackages__"],
+)
+
+# PJRT plugin library
+cc_library(
+    name = "pjrt_plugin_lib",
+    srcs = ["pjrt_plugin.cpp"],
+    hdrs = ["pjrt_plugin.h"],
+    deps = ["@xla//xla/pjrt/c:pjrt_c_api_hdrs"],
+    visibility = ["//xftcpp:__subpackages__"],
+)

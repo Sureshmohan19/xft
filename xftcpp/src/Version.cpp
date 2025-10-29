@@ -1,5 +1,4 @@
 #include "Version.h"
-#include <nanobind/stl/string.h>
 
 namespace xftcpp {
 

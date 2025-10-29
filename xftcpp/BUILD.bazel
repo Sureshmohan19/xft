@@ -1,58 +1,22 @@
-# Minimal BUILD - just verify we can reference XLA
-load("@rules_cc//cc:defs.bzl", "cc_binary")
+# Root BUILD.bazel - Aliases for convenience
 
-# Simple test: can we link to XLA?
-cc_binary(
-    name = "test_xla_link",
-    srcs = ["test_xla_link.cc"],
-    deps = [
-        "@com_google_absl//absl/status",
-        "@xla//xla:util",
-    ],
-)
-
-cc_binary(
-    name = "test_pjrt_basic",
-    srcs = ["src/test_pjrt_basic.cpp"],  
-    deps = [
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/types:span",
-        "@xla//xla:literal",
-        "@xla//xla:shape_util",
-        "@xla//xla/pjrt:pjrt_client",
-        "@xla//xla/pjrt/cpu:cpu_client",
-    ],
+# Alias to main Python extension (note: actual target has .so)
+alias(
+    name = "_xft_core",
+    actual = "//xftcpp/bindings:_xft_core.so",
     visibility = ["//visibility:public"],
 )
 
-cc_library(
-    name = "pjrt_plugin_lib",
-    srcs = ["src/pjrt_plugin.cpp"],
-    hdrs = ["src/pjrt_plugin.h"],
-    deps = ["@xla//xla/pjrt/c:pjrt_c_api_hdrs"],
-    visibility = ["//visibility:private"],
+# Alias to alternative Python module
+alias(
+    name = "xftcpp",
+    actual = "//xftcpp/bindings:xftcpp.so",
+    visibility = ["//visibility:public"],
 )
 
-cc_binary(
-    name = "test_pjrt_plugin",
-    srcs = [],
-    deps = [":pjrt_plugin_lib"],
-)
-## ---------------------------------------------------
-# Python bindings - Simple approach
-# ---------------------------------------------------
-load("//xftcpp/tools:pywrap.bzl", "pywrap_extension")
-
-pywrap_extension(
-    name = "_xft_core",
-    srcs = ["src/xft_bindings.cpp"],
-    deps = [
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-        "@xla//xla/pjrt:pjrt_client",
-        "@xla//xla/pjrt/cpu:cpu_client",
-        "@xla//xla/pjrt:status_casters",
-    ],
+# Alias to nanobind test
+alias(
+    name = "_test_nanobind",
+    actual = "//xftcpp/tests:_test_nanobind.so",
     visibility = ["//visibility:public"],
 )

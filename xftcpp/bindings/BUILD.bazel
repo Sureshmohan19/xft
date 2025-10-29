@@ -1,0 +1,27 @@
+
+load("//xftcpp/tools:pywrap.bzl", "pywrap_extension")
+
+# Main Python extension - XFT core
+pywrap_extension(
+    name = "_xft_core",
+    srcs = ["xft_core.cpp"],
+    deps = [
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@xla//xla/pjrt:pjrt_client",
+        "@xla//xla/pjrt/cpu:cpu_client",
+        "@xla//xla/pjrt:status_casters",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+# Alternative module with Version + PJRT plugin
+pywrap_extension(
+    name = "xftcpp",
+    srcs = ["xftcpp_main.cpp"],
+    deps = [
+        "//xftcpp/src:version_lib",
+        "//xftcpp/src:pjrt_plugin_lib",
+    ],
+    visibility = ["//visibility:public"],
+)

@@ -1,6 +1,0 @@
-load("//xftcpp/tools:pywrap.bzl", "pywrap_extension")
-
-pywrap_extension(
-    name = "_test_nanobind",
-    srcs = ["test_nanobind.cpp"],
-)
