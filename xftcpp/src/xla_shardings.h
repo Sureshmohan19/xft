@@ -26,14 +26,12 @@
 #include "xla/hlo/ir/hlo_sharding.h"
 
 #include "xftcpp/src/device_list.h"
+#include "xftcpp/src/index_domain.h"
+#include "xftcpp/src/memory.h"
 #include "xftcpp/src/sharding.h"
 #include "xftcpp/src/shape.h"
-#include "xftcpp/src/memory.h"
 
 namespace xftcpp {
-
-// Forward declarations
-class IndexDomain;
 
 // ============================================================================
 // HloSharding - XLA HloSharding Wrapper

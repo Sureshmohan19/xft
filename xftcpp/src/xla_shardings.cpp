@@ -30,28 +30,12 @@
 #include "xftcpp/src/device.h"
 #include "xftcpp/src/device_list.h"
 #include "xftcpp/src/index.h"
+#include "xftcpp/src/index_domain.h"
 #include "xftcpp/src/memory.h"
 #include "xftcpp/src/shape.h"
 #include "xftcpp/src/sharding.h"
 
 namespace xftcpp {
-
-// Forward declaration for IndexDomain
-// This needs to be defined elsewhere in the codebase
-class IndexDomain {
- public:
-  IndexDomain(const Shape& shape) : origin_(Index::Zeros(shape.dims().size())), shape_(shape) {}
-  
-  IndexDomain(Index origin, Shape shape) 
-      : origin_(std::move(origin)), shape_(std::move(shape)) {}
-  
-  const Shape& shape() const { return shape_; }
-  const Index& origin() const { return origin_; }
-  
- private:
-  Index origin_;
-  Shape shape_;
-};
 
 namespace {
 
