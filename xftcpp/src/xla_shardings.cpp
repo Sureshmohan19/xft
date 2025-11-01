@@ -29,39 +29,18 @@
 
 #include "xftcpp/src/device.h"
 #include "xftcpp/src/device_list.h"
+#include "xftcpp/src/index.h"
 #include "xftcpp/src/memory.h"
 #include "xftcpp/src/shape.h"
 #include "xftcpp/src/sharding.h"
 
 namespace xftcpp {
 
-// Forward declaration for Index and IndexDomain
-// These need to be defined elsewhere in the codebase
-class Index {
- public:
-  using Elements = std::vector<int64_t>;
-  explicit Index(Elements elements) : elements_(std::move(elements)) {}
-  explicit Index(absl::Span<const int64_t> elements)
-      : elements_(elements.begin(), elements.end()) {}
-  
-  const Elements& elements() const { return elements_; }
-  
-  // Element-wise multiplication with a span (for computing origins)
-  Index operator*(absl::Span<const int64_t> dims) const {
-    Elements result(elements_.size());
-    for (size_t i = 0; i < elements_.size(); ++i) {
-      result[i] = elements_[i] * dims[i];
-    }
-    return Index(std::move(result));
-  }
-  
- private:
-  Elements elements_;
-};
-
+// Forward declaration for IndexDomain
+// This needs to be defined elsewhere in the codebase
 class IndexDomain {
  public:
-  IndexDomain(const Shape& shape) : origin_(), shape_(shape) {}
+  IndexDomain(const Shape& shape) : origin_(Index::Zeros(shape.dims().size())), shape_(shape) {}
   
   IndexDomain(Index origin, Shape shape) 
       : origin_(std::move(origin)), shape_(std::move(shape)) {}
