@@ -1,0 +1,32 @@
+# Standalone minimal .bazelrc
+common --noenable_bzlmod
+common --announce_rc
+
+build --cxxopt=-Wno-deprecated-declarations
+
+# Required experimental flag for XLA's repository rules
+common --experimental_repo_remote_exec
+
+build --repo_env=HERMETIC_PYTHON_VERSION=3.12
+
+# Disable hermetic toolchains - use local macOS compiler
+common --noincompatible_enable_cc_toolchain_resolution
+build --repo_env=USE_HERMETIC_CC_TOOLCHAIN=0
+
+# macOS specific
+build --apple_platform_type=macos
+build --apple_crosstool_top=@local_config_apple_cc//:toolchain
+build --crosstool_top=@local_config_apple_cc//:toolchain
+build --host_crosstool_top=@local_config_apple_cc//:toolchain
+build --cxxopt=-std=c++17
+build --host_cxxopt=-std=c++17
+
+# XFT Local Build Cache - Independent from JAX
+# Disk cache for compiled artifacts
+build --disk_cache=~/.cache/bazel/xft_disk_cache
+
+# Repository cache for external dependencies
+build --repository_cache=~/.cache/bazel/xft_repo_cache
+
+# Optimization
+build -c opt
