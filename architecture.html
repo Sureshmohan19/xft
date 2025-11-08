@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>xft v0.0.1 Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #F5F5F5;
+            color: #333;
+            padding: 40px 40px 40px 80px;
+            line-height: 1.8;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 60px;
+            background: repeating-linear-gradient(
+                transparent,
+                transparent 30px,
+                #E0E0E0 30px,
+                #E0E0E0 31px
+            );
+            border-right: 1px solid #0D0D0D;
+        }
+        h1 {
+            color: #7404BF;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            border-bottom: 3px solid #7404BF;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #7404BF;
+            font-size: 1.5em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-bottom: 20px;
+        }
+        ul {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+        li {
+            margin-bottom: 10px;
+        }
+        strong {
+            color: #7404BF;
+            font-weight: bold;
+        }
+        code {
+            background: #E8E8E8;
+            padding: 2px 6px;
+            color: #7404BF;
+            border-radius: 3px;
+        }
+        .version {
+            color: #888;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>xft v0.0.1 Architecture</h1>
+    <p class="version">Minimal Tensor Framework for Deep Learning</p>
+
+    <h2>Core Philosophy</h2>
+    <p>xft is a minimal, understandable deep learning framework built from scratch. We target <strong>AMD CPUs</strong>, <strong>NVIDIA GPUs</strong>, and <strong>Linux only</strong>. No abstraction layers. No magic. Just clean code you can fully understand.</p>
+
+    <h2>Technology Stack</h2>
+    <ul>
+        <li><strong>Frontend:</strong> Python 3.8+ for user API</li>
+        <li><strong>Backend:</strong> C++ for tensor operations and autograd engine</li>
+        <li><strong>GPU:</strong> CUDA for GPU kernels</li>
+        <li><strong>Bindings:</strong> pybind11 for Python-C++ interface</li>
+        <li><strong>Build:</strong> CMake for compilation, pip for installation</li>
+        <li><strong>License:</strong> MIT</li>
+    </ul>
+    <h2>v0.0.1 Scope</h2>
+    <p>This version implements basic automatic differentiation with 1D arrays:</p>
+    <ul>
+        <li>Array class with <code>requires_grad</code> support</li>
+        <li>Operations: add, multiply (element-wise and scalar)</li>
+        <li>Computation graph construction during forward pass</li>
+        <li>Reverse-mode automatic differentiation via <code>.backward()</code></li>
+        <li>Gradient accumulation in <code>.grad</code> attribute</li>
+        <li>Support for scalars and 1D arrays only (no matrices yet)</li>
+    </ul>
+
+    <h2>Target Example</h2>
+    <p>By end of v0.0.1, this code must work:</p>
+    <code>
+        x = xft.Array([2.0], requires_grad=True)<br>
+        w = xft.Array([3.0], requires_grad=True)<br>
+        y = w * x + xft.Array([1.0])<br>
+        y.backward()<br>
+        print(x.grad, w.grad)
+    </code>
+
+    <h2>Design Decisions</h2>
+    <ul>
+        <li><strong>Memory:</strong> Row-major layout (C-style), float32 only</li>
+        <li><strong>Graph:</strong> Array-centric (each array tracks its creator)</li>
+        <li><strong>Operations:</strong> Naive C++ loops (no BLAS yet)</li>
+        <li><strong>Mode:</strong> Eager execution only (CPU only)</li>
+        <li><strong>Threading:</strong> Single-threaded, not thread-safe</li>
+        <li><strong>Errors:</strong> C++ exceptions propagated to Python</li>
+    </ul>
+</body>
+</html>
