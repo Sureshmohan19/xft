@@ -80,29 +80,57 @@ set_target_properties(xft_core PROPERTIES
 )
 
 # ----------------------------------------------------------------------------
-# C++ Test Executable: test_scalar_cpp
-# This tests our C++ code directly without Python
+# C++ Test Executables
+# Each component has its own test suite for granular testing
 
+# Test: Scalar
 add_executable(test_scalar_cpp tests/test_scalar.cpp)
-
-# Link against our headers
 target_include_directories(test_scalar_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
+set_target_properties(test_scalar_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-# Output to build directory
-set_target_properties(test_scalar_cpp PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-)
+# Test: Memory
+add_executable(test_memory_cpp tests/test_memory.cpp)
+target_include_directories(test_memory_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
+set_target_properties(test_memory_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Test: Storage
+add_executable(test_storage_cpp tests/test_storage.cpp)
+target_include_directories(test_storage_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
+set_target_properties(test_storage_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Test: Array
+add_executable(test_array_cpp tests/test_array.cpp)
+target_include_directories(test_array_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
+set_target_properties(test_array_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+# Test: Integration
+add_executable(test_integration_cpp tests/test_integration.cpp)
+target_include_directories(test_integration_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
+set_target_properties(test_integration_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # ----------------------------------------------------------------------------
 # Custom Targets
 
 # Target: make test
-# Builds and runs C++ tests
+# Builds and runs all C++ tests
 add_custom_target(test
+    COMMAND echo "==================== Running Scalar Tests ===================="
     COMMAND test_scalar_cpp
-    DEPENDS test_scalar_cpp
+    COMMAND echo ""
+    COMMAND echo "==================== Running Memory Tests ===================="
+    COMMAND test_memory_cpp
+    COMMAND echo ""
+    COMMAND echo "==================== Running Storage Tests ===================="
+    COMMAND test_storage_cpp
+    COMMAND echo ""
+    COMMAND echo "==================== Running Array Tests ===================="
+    COMMAND test_array_cpp
+    COMMAND echo ""
+    COMMAND echo "==================== Running Integration Tests ===================="
+    COMMAND test_integration_cpp
+    DEPENDS test_scalar_cpp test_memory_cpp test_storage_cpp test_array_cpp test_integration_cpp
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
-    COMMENT "Running C++ tests..."
+    COMMENT "Running all C++ tests..."
 )
 
 # ----------------------------------------------------------------------------

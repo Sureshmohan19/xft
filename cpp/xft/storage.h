@@ -71,10 +71,9 @@ public:
     // false = wrapping external memory, caller manages lifetime.
     bool owns_data() const noexcept { return owns_data_; }
 
-    // Number of Arrays sharing this Storage.
+    // Number of Storage instances sharing this data buffer.
     // Useful for debugging/optimization decisions (copy-on-write).
     long use_count() const noexcept { 
-        // Return use count from the data_shared_ pointer
         return data_shared_.use_count(); 
     }
 
