@@ -1,0 +1,28 @@
+# Include documentation
+include README.md
+include LICENSE
+
+# Include C++ source files
+recursive-include cpp *.h *.hpp *.cpp
+
+# Include CMake files
+include CMakeLists.txt
+
+# Include Python package files
+recursive-include xft *.py
+
+# Exclude build artifacts
+global-exclude *.pyc
+global-exclude __pycache__
+global-exclude *.so
+global-exclude *.pyd
+global-exclude .DS_Store
+
+# Exclude test binaries
+exclude tests/test_*_cpp
+
+# Exclude build directories
+prune build
+prune dist
+prune *.egg-info
+

@@ -74,10 +74,14 @@ pybind11_add_module(xft_core MODULE cpp/bindings/bindings.cpp)
 # Link against our headers (header-only for now)
 target_include_directories(xft_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 
-# Output the module to the project root for easy Python import
-set_target_properties(xft_core PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
+# Output the module to the appropriate directory
+# If CMAKE_LIBRARY_OUTPUT_DIRECTORY is set (by setup.py), use it
+# Otherwise, output to project root for direct cmake builds
+if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
+    set_target_properties(xft_core PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+endif()
 
 # ----------------------------------------------------------------------------
 # C++ Test Executables
