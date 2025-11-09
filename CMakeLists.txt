@@ -1,40 +1,28 @@
-# ============================================================================
 # XFT - CMake Build Configuration
-# ============================================================================
+
+# ----------------------------------------------------------------------------
 # Target Platform: x86_64 Linux (AMD Zen2+)
 # Compiler: GCC/Clang with C++17
-# Output: xft_core Python extension module + C++ test executable
-#
-# Build instructions:
-#   mkdir build && cd build
-#   cmake ..
-#   make
-#   make test               # Run C++ tests
 
 cmake_minimum_required(VERSION 3.15)
 
 project(xft LANGUAGES CXX)
 
-# ============================================================================
+# ----------------------------------------------------------------------------
 # C++ Standard
-# ============================================================================
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# ============================================================================
+# ----------------------------------------------------------------------------
 # Build Type
-# ============================================================================
 # Default to Release if not specified
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-
-# ============================================================================
+# ----------------------------------------------------------------------------
 # Compiler Flags
-# ============================================================================
 # x86_64 optimizations - portable across AMD/Intel
 # -march=native will optimize for your specific CPU (Zen2, Zen3, etc.)
 
@@ -65,29 +53,20 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     endif()
 endif()
 
-# ============================================================================
+# ----------------------------------------------------------------------------
 # Include Directories
-# ============================================================================
 # All our headers are in cpp/
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 
-# ============================================================================
+# ----------------------------------------------------------------------------
 # Python Module: xft_core
-# ============================================================================
 # This builds the Python extension module for testing
 
 # Find Python
 find_package(Python COMPONENTS Interpreter Development REQUIRED)
-message(STATUS "Found Python: ${Python_VERSION}")
-message(STATUS "Python include dirs: ${Python_INCLUDE_DIRS}")
 
 # Find pybind11
-# Option 1: Installed via pip (pip install pybind11)
 find_package(pybind11 CONFIG REQUIRED)
-message(STATUS "Found pybind11: ${pybind11_VERSION}")
-
-# Option 2: If pybind11 not found, uncomment this and add as submodule:
-# add_subdirectory(external/pybind11)
 
 # Create the Python module
 pybind11_add_module(xft_core MODULE cpp/bindings/bindings.cpp)
@@ -100,11 +79,8 @@ set_target_properties(xft_core PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-message(STATUS "Python module will be built as: xft_core${Python_SOABI}.so")
-
-# ============================================================================
+# ----------------------------------------------------------------------------
 # C++ Test Executable: test_scalar_cpp
-# ============================================================================
 # This tests our C++ code directly without Python
 
 add_executable(test_scalar_cpp tests/test_scalar.cpp)
@@ -117,9 +93,8 @@ set_target_properties(test_scalar_cpp PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 
-# ============================================================================
+# ----------------------------------------------------------------------------
 # Custom Targets
-# ============================================================================
 
 # Target: make test
 # Builds and runs C++ tests
@@ -130,9 +105,8 @@ add_custom_target(test
     COMMENT "Running C++ tests..."
 )
 
-# ============================================================================
+# ----------------------------------------------------------------------------
 # Installation (Optional)
-# ============================================================================
 # For now, we just use the module from the source directory
 # Uncomment if you want to install to site-packages:
 
@@ -140,32 +114,8 @@ add_custom_target(test
 #     LIBRARY DESTINATION ${Python_SITEARCH}
 # )
 
-# ============================================================================
-# Summary
-# ============================================================================
-message(STATUS "")
-message(STATUS "=== XFT Build Configuration ===")
-message(STATUS "C++ Standard: C++${CMAKE_CXX_STANDARD}")
-message(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-message(STATUS "Python version: ${Python_VERSION}")
-message(STATUS "pybind11 version: ${pybind11_VERSION}")
-message(STATUS "")
-message(STATUS "Build targets:")
-message(STATUS "  make                  - Build everything")
-message(STATUS "  make xft_core         - Build Python module only")
-message(STATUS "  make test_scalar_cpp  - Build C++ test only")
-message(STATUS "  make test             - Build and run C++ tests")
-message(STATUS "")
-message(STATUS "Output files:")
-message(STATUS "  ${CMAKE_CURRENT_SOURCE_DIR}/xft_core.so - Python module")
-message(STATUS "  ${CMAKE_BINARY_DIR}/test_scalar_cpp - C++ test executable")
-message(STATUS "===============================")
-message(STATUS "")
-
-# ============================================================================
+# ----------------------------------------------------------------------------
 # Platform Verification
-# ============================================================================
 # Verify we're on the expected platform
 if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64|AMD64")
     message(WARNING "This project is optimized for x86_64, but detected: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -174,6 +124,3 @@ endif()
 if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(WARNING "This project is designed for Linux, but detected: ${CMAKE_SYSTEM_NAME}")
 endif()
-
-# Display CPU architecture info
-message(STATUS "Target architecture: ${CMAKE_SYSTEM_PROCESSOR}")

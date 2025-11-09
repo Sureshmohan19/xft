@@ -1,19 +1,11 @@
 // ============================================================================
 // XFT Scalar - C++ Unit Tests
+// This file tests our C++ Scalar class directly, without Python bindings.
 // ============================================================================
-// This file tests our C++ Scalar class directly, without Python.
-// 
-// Build and run:
-//   mkdir build && cd build
-//   cmake ..
-//   make test_scalar_cpp
-//   ./test_scalar_cpp
-//
-// Or use the shortcut:
-//   make test_cpp
 
-#include "xft/scalar_types.h"
 #include "xft/scalar.h"
+#include "xft/scalar_types.h"
+
 #include <iostream>
 #include <cassert>
 #include <cmath>
@@ -41,9 +33,7 @@
 
 using namespace xft;
 
-// ============================================================================
 // Test 1: Basic Construction
-// ============================================================================
 TEST(construction) {
     // Create a Float32 scalar
     Scalar s(3.14f);
@@ -58,9 +48,7 @@ TEST(construction) {
     ASSERT_NEAR(value, 3.14f, 1e-6f);
 }
 
-// ============================================================================
 // Test 2: Value Extraction
-// ============================================================================
 TEST(value_extraction) {
     Scalar s(42.5f);
     
@@ -76,9 +64,7 @@ TEST(value_extraction) {
     ASSERT_EQ(val1, val2);
 }
 
-// ============================================================================
 // Test 3: Type Checking
-// ============================================================================
 TEST(type_checking) {
     Scalar s(1.0f);
     
@@ -91,9 +77,7 @@ TEST(type_checking) {
     ASSERT_EQ(dtype_str, "float32");
 }
 
-// ============================================================================
 // Test 4: Equality Comparison
-// ============================================================================
 TEST(equality) {
     Scalar s1(3.14f);
     Scalar s2(3.14f);
@@ -111,9 +95,7 @@ TEST(equality) {
     ASSERT(s1 == s1);
 }
 
-// ============================================================================
 // Test 5: Boolean Conversion (Truthiness)
-// ============================================================================
 TEST(boolean_conversion) {
     Scalar zero(0.0f);
     Scalar nonzero(3.14f);
@@ -127,9 +109,7 @@ TEST(boolean_conversion) {
     ASSERT(static_cast<bool>(negative));
 }
 
-// ============================================================================
 // Test 6: String Representation
-// ============================================================================
 TEST(string_representation) {
     Scalar s(3.14f);
     
@@ -147,9 +127,7 @@ TEST(string_representation) {
     std::cout << "\n    repr: " << repr;
 }
 
-// ============================================================================
 // Test 7: Edge Cases - Special Float Values
-// ============================================================================
 TEST(special_float_values) {
     // Zero
     Scalar s_zero(0.0f);
@@ -176,9 +154,7 @@ TEST(special_float_values) {
     ASSERT(std::isnan(s_nan.toFloat()));
 }
 
-// ============================================================================
 // Test 8: Type System - Enum Conversions
-// ============================================================================
 TEST(type_system) {
     // ScalarType to string
     std::string name = scalarTypeToString(ScalarType::Float32);
@@ -194,9 +170,7 @@ TEST(type_system) {
     ASSERT(!invalid.has_value());
 }
 
-// ============================================================================
 // Test 9: Copy Semantics
-// ============================================================================
 TEST(copy_semantics) {
     Scalar s1(3.14f);
     
@@ -218,9 +192,7 @@ TEST(copy_semantics) {
     ASSERT_NE(s1, s4);  // s1 unchanged
 }
 
-// ============================================================================
 // Test 10: Move Semantics
-// ============================================================================
 TEST(move_semantics) {
     Scalar s1(3.14f);
     
@@ -235,9 +207,7 @@ TEST(move_semantics) {
     ASSERT_NEAR(s3.toFloat(), 2.71f, 1e-6f);
 }
 
-// ============================================================================
 // Test 11: Performance - Construction and Extraction
-// ============================================================================
 TEST(performance_basic) {
     const int iterations = 1'000'000;
     
@@ -259,9 +229,7 @@ TEST(performance_basic) {
     std::cout << " done";
 }
 
-// ============================================================================
 // Test 12: Error Handling - Type Mismatch (Future)
-// ============================================================================
 TEST(error_handling) {
     Scalar s(3.14f);
     
@@ -277,13 +245,10 @@ TEST(error_handling) {
     }
 }
 
-// ============================================================================
 // Main Test Runner
-// ============================================================================
 int main() {
-    std::cout << "========================================\n";
     std::cout << "XFT Scalar C++ Unit Tests\n";
-    std::cout << "========================================\n\n";
+    std::cout << "----------------------------------------\n";
     
     try {
         RUN_TEST(construction);
@@ -299,9 +264,7 @@ int main() {
         RUN_TEST(performance_basic);
         RUN_TEST(error_handling);
         
-        std::cout << "\n========================================\n";
-        std::cout << "✓ ALL TESTS PASSED (" << 12 << " tests)\n";
-        std::cout << "========================================\n";
+        std::cout << "\n✓ ALL TESTS PASSED (" << 12 << " tests)\n";
         
         return 0;
         
@@ -313,22 +276,3 @@ int main() {
         return 1;
     }
 }
-
-// ============================================================================
-// Build and Run Instructions
-// ============================================================================
-// 
-// From project root:
-//   mkdir build && cd build
-//   cmake ..
-//   make test_scalar_cpp
-//   ./test_scalar_cpp
-//
-// Or use the convenience target:
-//   make test_cpp
-//
-// Expected output:
-//   Running test_construction... ✓ PASSED
-//   Running test_value_extraction... ✓ PASSED
-//   ...
-//   ✓ ALL TESTS PASSED (12 tests)

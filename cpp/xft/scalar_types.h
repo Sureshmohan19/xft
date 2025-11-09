@@ -84,6 +84,27 @@ inline std::optional<ScalarType> stringToScalarType(const std::string& str) {
     return std::nullopt;
 }
 
+// ============================================================================
+// Helper: Get size in bytes for a ScalarType
+// ============================================================================
+
+inline size_t scalarTypeSize(ScalarType type) {
+    switch (type) {
+        case ScalarType::Float32: return sizeof(float);
+        case ScalarType::Float64: return sizeof(double);
+    }
+    // Unreachable (all enum values covered)
+    return 0;
+}
+
+// ============================================================================
+// Helper: Get string name for a ScalarType (alias for scalarTypeToString)
+// ============================================================================
+
+inline std::string scalarTypeName(ScalarType type) {
+    return scalarTypeToString(type);
+}
+
 }  // namespace xft
 
 #endif  // XFT_SCALAR_TYPES_H
