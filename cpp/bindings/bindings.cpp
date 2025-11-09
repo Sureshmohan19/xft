@@ -9,7 +9,7 @@ namespace py = pybind11;
 // ============================================================================
 
 PYBIND11_MODULE(xft_core, m) {
-    m.doc() = "XFT - Deep Learning Framework (Core Module)";
+    m.doc() = "XFT - Simple deep learning framework ❤️ (Core Module)";
     
     // 1. Version Info
     m.attr("__version__") = "0.0.1";

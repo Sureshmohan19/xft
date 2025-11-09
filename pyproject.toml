@@ -19,12 +19,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "xft"
-version = "0.1.0"
-description = "XFT - Deep Learning Framework optimized for x86_64"
+version = "0.0.1"
+description = "XFT - Simple deep learning framework ❤️"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Aakriti Suresh", email = "your.email@example.com"},
+    {name = "Suresh Neethimohan", email = "mohansuresh333@gmail.com"},
 ]
 requires-python = ">=3.8"
 keywords = ["deep-learning", "tensor", "neural-network", "x86_64", "avx2"]

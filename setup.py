@@ -92,7 +92,7 @@ class CMakeBuild(build_ext):
 
 
 # Read version from pyproject.toml (or define here)
-VERSION = "0.1.0"
+VERSION = "0.0.1"
 
 # Read long description from README
 readme_path = Path(__file__).parent / "README.md"
@@ -101,8 +101,9 @@ long_description = readme_path.read_text(encoding='utf-8') if readme_path.exists
 setup(
     name="xft",
     version=VERSION,
-    author="Aakriti Suresh",
-    description="XFT - Deep Learning Framework optimized for x86_64",
+    author="Suresh Neethimohan",
+    author_email="mohansuresh333@gmail.com",
+    description="XFT - Simple deep learning framework ❤️",
     long_description=long_description,
     long_description_content_type="text/markdown",
     ext_modules=[CMakeExtension('xft.xft_core')],
