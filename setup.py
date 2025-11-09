@@ -84,7 +84,7 @@ class CMakeBuild(build_ext):
         # Run CMake build
         print(f"Building extension {ext.name}")
         subprocess.check_call(
-            ['cmake', '--build', '.', '--target', 'xft_core'] + build_args,
+            ['cmake', '--build', '.', '--target', '_core'] + build_args,
             cwd=self.build_temp
         )
         
@@ -106,9 +106,9 @@ setup(
     description="XFT - Simple deep learning framework ❤️",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    ext_modules=[CMakeExtension('xft.xft_core')],
+    ext_modules=[CMakeExtension('xft._core')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    python_requires=">=3.8",
+    python_requires=">=3.10",
 )
 

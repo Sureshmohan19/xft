@@ -59,7 +59,7 @@ endif()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 
 # ----------------------------------------------------------------------------
-# Python Module: xft_core
+# Python Module: _core
 # This builds the Python extension module for testing
 
 # Find Python
@@ -69,16 +69,16 @@ find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 CONFIG REQUIRED)
 
 # Create the Python module
-pybind11_add_module(xft_core MODULE cpp/bindings/bindings.cpp)
+pybind11_add_module(_core MODULE cpp/bindings/bindings.cpp)
 
 # Link against our headers (header-only for now)
-target_include_directories(xft_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
+target_include_directories(_core PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 
 # Output the module to the appropriate directory
 # If CMAKE_LIBRARY_OUTPUT_DIRECTORY is set (by setup.py), use it
 # Otherwise, output to project root for direct cmake builds
 if(NOT CMAKE_LIBRARY_OUTPUT_DIRECTORY)
-    set_target_properties(xft_core PROPERTIES
+    set_target_properties(_core PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     )
 endif()
@@ -88,27 +88,27 @@ endif()
 # Each component has its own test suite for granular testing
 
 # Test: Scalar
-add_executable(test_scalar_cpp tests/test_scalar.cpp)
+add_executable(test_scalar_cpp tests/cpp/test_scalar.cpp)
 target_include_directories(test_scalar_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 set_target_properties(test_scalar_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Test: Memory
-add_executable(test_memory_cpp tests/test_memory.cpp)
+add_executable(test_memory_cpp tests/cpp/test_memory.cpp)
 target_include_directories(test_memory_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 set_target_properties(test_memory_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Test: Storage
-add_executable(test_storage_cpp tests/test_storage.cpp)
+add_executable(test_storage_cpp tests/cpp/test_storage.cpp)
 target_include_directories(test_storage_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 set_target_properties(test_storage_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Test: Array
-add_executable(test_array_cpp tests/test_array.cpp)
+add_executable(test_array_cpp tests/cpp/test_array.cpp)
 target_include_directories(test_array_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 set_target_properties(test_array_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 # Test: Integration
-add_executable(test_integration_cpp tests/test_integration.cpp)
+add_executable(test_integration_cpp tests/cpp/test_integration.cpp)
 target_include_directories(test_integration_cpp PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/cpp)
 set_target_properties(test_integration_cpp PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
@@ -142,7 +142,7 @@ add_custom_target(test
 # For now, we just use the module from the source directory
 # Uncomment if you want to install to site-packages:
 
-# install(TARGETS xft_core
+# install(TARGETS _core
 #     LIBRARY DESTINATION ${Python_SITEARCH}
 # )
 
