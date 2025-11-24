@@ -42,4 +42,4 @@ To deeply understand how deep learning frameworks work end to end: memory, kerne
 
 ## License
 
-MIT (to be added).
+MIT License.
